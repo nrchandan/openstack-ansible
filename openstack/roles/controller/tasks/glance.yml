@@ -1,0 +1,63 @@
+---
+     - name:  install keystone service 
+       keystone_service: token={{controller.os_token}} name=keystone type=identity description="Identity Service" public_url="http://controller:5000/v2.0" internal_url="http://controller:5000/v2.0" admin_url="http://controller:35357/v2.0"
+       tags: 
+         - keystone
+  
+     - name: create admin tenant 
+       keystone_user: tenant={{ item.project }} tenant_description={{ item.desc }}  token={{controller.os_token}}
+       with_items:
+          - { project : 'admin' ,  desc : 'Admin Tenant' }
+          - { project : 'demo' ,  desc : 'demo Tenant' }
+          - { project : 'service' ,  desc : 'service Tenant' }
+       tags:
+         - keystone_user 
+
+     - name: create admin account 
+       keystone_user: user={{ item.user }} tenant={{ item.project }} password={{ item.password }} token={{controller.os_token}}
+       with_items:
+          - { project : 'admin' , user : 'admin' ,  password : '{{controller.admin_pass}}' }
+          - { project : 'demo' , user : 'demo' ,  password : '{{controller.demo_pass}}' }
+          - { project : 'service' , user : 'glance' ,  password : '{{controller.glance_pass}}' }
+       tags: 
+         - admin_user
+     - name: create admin role 
+       keystone_user: role=admin user=admin tenant=admin token={{controller.os_token}}
+       tags: 
+         - admin_user 
+     - name: create admin role glance 
+       keystone_user: role=admin user=glance tenant=service token={{controller.os_token}}
+       tags: 
+         - glance_user 
+      
+     - name: glance service list 
+       keystone_service: login_password={{controller.admin_pass}} login_user=admin endpoint="http://controller:35357/v2.0" tenant_name="admin"  name="glance" type="image" description="Image Service" public_url="http://controller:9292" internal_url="http://controller:9292" admin_url="http://controller:9292" 
+       tags:
+         - glance
+
+     - name: restart glance service 
+       service: name={{item}} state=restarted
+       with_items: 
+           - glance-api
+           - glance-registry 
+
+     - name: Wait for glance to restart
+       wait_for:
+         port=9292
+         delay=20
+         timeout=300
+
+
+     - name: adding glance Image
+       glance_image: login_username=admin
+                login_password={{controller.admin_pass}}
+                login_tenant_name=admin
+                auth_url=http://controller:35357/v2.0
+                name=cirros
+                container_format=bare
+                disk_format=qcow2
+                state=present
+                owner=admin
+                copy_from=http://10.0.0.111/cirros-0.3.3-x86_64-disk.img
+       tags:
+         - glance_image

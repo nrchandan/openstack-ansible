@@ -1,0 +1,17 @@
+---
+
+     - name: create admin account 
+       keystone_user: user={{ item.user }} tenant={{ item.project }} password={{ item.password }} token={{controller.os_token}}
+       with_items:
+          - { project : 'service' , user : 'nova' ,  password : '{{controller.nova_pass}}' }
+       tags: 
+         - nova_user
+     - name: create admin role nova 
+       keystone_user: role=admin user=nova tenant=service token={{controller.os_token}}
+       tags: 
+         - nova_user 
+      
+     - name: Service Nova create  
+       keystone_service: login_password=admin login_user=admin endpoint="http://controller:35357/v2.0" tenant_name="admin"  name="nova" type="compute" description="compute Service" public_url="http://controller:8774/v2/%(tenant_id)s" internal_url="http://controller:8774/v2/%(tenant_id)s" admin_url="http://controller:8774/v2/%(tenant_id)s" 
+       tags:
+         - nova_service

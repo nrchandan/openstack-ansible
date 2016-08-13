@@ -1,0 +1,6 @@
+---
+ - name: nova-compute restart
+   service: name=nova-compute state=restarted
+ 
+ - name: nova-switch restart
+   service: name=openvswitch-switch state=restarted

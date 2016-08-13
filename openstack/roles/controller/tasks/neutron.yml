@@ -1,0 +1,16 @@
+---
+     - name: create admin account neutron 
+       keystone_user: user={{ item.user }} tenant={{ item.project }} password={{ item.password }} token={{controller.os_token}}
+       with_items:
+          - { project : 'service' , user : 'neutron' ,  password : '{{controller.neutron_pass}}' }
+       tags: 
+         - neutron_user
+     - name: create admin role neutron
+       keystone_user: role=admin user=neutron tenant=service token={{controller.os_token}}
+       tags: 
+         - neutron_user 
+      
+     - name: Neutron service create
+       keystone_service: login_password={{controller.admin_pass}} login_user=admin endpoint="http://controller:35357/v2.0" tenant_name="admin"  name="neutron" type="network" description="neutron Service" public_url="http://controller:9696" internal_url="http://controller:9696" admin_url="http://controller:9696" 
+       tags:
+         - neutron_service

@@ -1,0 +1,39 @@
+---
+- name: restart mysql
+  service: name=mysql state=restarted
+
+- name: Build keystone db
+  command: /bin/sh -c "keystone-manage db_sync" keystone
+
+- name: Build glance db
+  command: /bin/sh -c "glance-manage db_sync" glance
+
+- name: restart apache
+  service: name=apache2 state=restarted
+
+- name: restart glance-reg
+  service: name=glance-registry state=restarted
+
+- name: restart glance-api
+  service: name=glance-api state=restarted
+
+- name: Build nova db
+  command: /bin/sh -c "nova-manage db sync" nova
+
+- name: restart nova-api 
+  service: name={{ item }} state=restarted
+  with_items:
+       - nova-api
+       - nova-cert
+       - nova-consoleauth
+       - nova-scheduler    
+       - nova-conductor 
+       - nova-novncproxy 
+- name: Build neutron db
+  command: /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+
+- name : restart neutron-server
+  service: name={{ item  }} state=restarted
+  with_items:
+      - nova-api
+      - neutron-server   

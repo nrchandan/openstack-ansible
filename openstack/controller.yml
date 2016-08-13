@@ -1,0 +1,9 @@
+---
+- hosts: controller
+  vars_files:
+     - openstack_var.yml
+  roles:
+    - controller
+  environment:
+     OS_TOKEN: cc6ceb2f0bb02999a5f9
+     OS_URL: http://controller:35357/v2.0

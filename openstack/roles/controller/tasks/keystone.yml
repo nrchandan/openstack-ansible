@@ -1,0 +1,13 @@
+---
+      - name: shell
+        keystone_service: token={{controller.os_token}} name=keystone type=identity description="Identity Service" public_url="http://controller:5000/v2.0" internal_url="http://controller:5000/v2.0" admin_url="http://controller:35357/v2.0"
+
+      - name: keystone admin project
+        keystone_user: token={{controller.os_token}} tenant=admin tenant_description="Admin Project"
+      - name: keystone create admin user
+        keystone_user: token={{controller.os_token}} user=admin tenant=admin password={{controller.admin_pass}}
+      - name: keystone create admin role
+        keystone_user: token={{controller.os_token}} role=admin user=admin tenant=admin
+
+      - name: keystone create service project
+        keystone_user: token={{controller.os_token}} tenant=service tenant_description="Service Project"

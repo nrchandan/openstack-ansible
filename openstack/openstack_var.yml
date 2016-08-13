@@ -1,0 +1,28 @@
+---
+ controller: {
+      os_token: cc6ceb2f0bb02999a5f9 ,
+      os_url: "http://controller:35357/v2.0" ,
+      rabbit_pass: RABBIT_PASS ,
+      nava_pass: nova  ,
+      KEYSTONE_DBPASS: KEYSTONE_DBPASS ,
+      GLANCE_DBPASS: GLANCE_DBPASS  ,
+      NOVA_DBPASS: NOVA_DBPASS ,
+      NEUTRON_DBPASS: NEUTRON_DBPASS ,
+      Keystone_public: "http://controller:5000/v2.0" ,
+      keystone_int: "http://controller:5000/v2.0" ,
+      keystone_admin: "http://controller:35357/v2.0" ,
+      admin_pass: admin ,
+      glance_pass: glance ,
+      demo_pass: admin ,
+      nova_pass: nova ,
+      neutron_pass: neutron ,
+}
+ glance: {   
+      public_url: "http://controller:9292" , 
+      internal_url: "http://controller:9292" , 
+      admin_url: "http://controller:9292"  , 
+      glance_pass: glance  ,
+}
+
+
+      

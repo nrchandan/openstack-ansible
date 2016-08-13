@@ -1,0 +1,13 @@
+---
+ - hosts: all
+   user: root
+   gather_facts: yes
+#   include_vars: openstack_var.yml
+   vars_files: 
+     - openstack_var.yml
+   tasks: 
+     - name:  test
+       shell: date
+ - include: controller.yml # tags=controller_host
+ - include: neutron.yml    tags=neutron_host
+ - include: compute.yml    tags=compute_host

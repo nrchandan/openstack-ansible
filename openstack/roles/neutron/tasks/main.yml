@@ -1,0 +1,55 @@
+---
+  - name: Install Openstack Repo
+    apt: name=ubuntu-cloud-keyring state=present
+  - name: Install Openstack Repo1
+    apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu  trusty-updates/kilo main' state=present
+  - name: Install Openstack Repo1
+    apt: name=python-pycurl state=present
+
+
+  - name: upgrade repo
+    apt: update_cache=yes
+
+  - name: upgrade dist
+    apt: upgrade=dist
+
+  - name: install req packages
+    apt: name={{ item }} state=installed
+    with_items:
+    - neutron-plugin-ml2 
+    - neutron-plugin-openvswitch-agent 
+    - neutron-l3-agent 
+    - neutron-dhcp-agent 
+    - neutron-metadata-agent
+    - ntp
+
+#### NTP SERVER
+  - name: ntp configuration
+    copy: src=ntp.conf  dest=/etc/ntp.conf backup=yes
+
+  - name: restart ntp
+    service: name=ntp state=restarted
+
+  - include: sysctl.yml
+
+  - name: copy configuration files
+    copy: src={{ item.src }} dest={{ item.dest }} backup=yes
+    with_items:
+    - { src: 'neutron.conf' , dest: '/etc/neutron/neutron.conf' }
+    - { src: 'ml2_conf.ini' , dest: '/etc/neutron/plugins/ml2/ml2_conf.ini' }
+    - { src: 'l3_agent.ini' , dest: '/etc/neutron/l3_agent.ini' }
+    - { src: 'dhcp_agent.ini' , dest: '/etc/neutron/dhcp_agent.ini' }
+    - { src: 'metadata_agent.ini' , dest: '/etc/neutron/metadata_agent.ini' }
+    notify: restart openvswitch-switch
+
+  - name: create  br-ex
+   # command: 'ovs-vsctl add-br br-ex'
+    openvswitch_bridge: bridge=br-ex state=present
+ 
+  - name: create  br-ex interface
+   # command: 'ovs-vsctl add-port br-ex eth2'
+    openvswitch_port: bridge=br-ex port=eth2 state=present
+    notify: restart network
+   
+
+

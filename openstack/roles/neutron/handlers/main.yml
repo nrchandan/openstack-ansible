@@ -1,0 +1,11 @@
+---
+- name: restart openvswitch-switch
+  service: name=openvswitch-switch state=restarted
+
+- name: restart network  
+  service: name={{ item }} state=restarted
+  with_items:
+    - neutron-plugin-openvswitch-agent
+    - neutron-l3-agent 
+    - neutron-dhcp-agent 
+    - neutron-metadata-agent 

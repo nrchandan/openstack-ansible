@@ -1,0 +1,201 @@
+---
+  - name: echo test 
+    shell: echo {{controller.os_token}}
+  - name: Install Openstack Repo
+    apt: name=ubuntu-cloud-keyring state=present
+  - name: Install Openstack Repo1
+    apt_repository: repo='deb http://ubuntu-cloud.archive.canonical.com/ubuntu  trusty-updates/kilo main' state=present
+  - name: Install Openstack Repo1
+    apt: name=python-pycurl state=present
+
+  - include: sysctl.yml 
+
+  - name: upgrade repo 
+    apt: update_cache=yes
+  
+  - name: upgrade dist 
+    apt: upgrade=dist
+  - name: disable keystone startup service 
+    shell: echo "manual" > /etc/init/keystone.override 
+    
+  - name: install req packages
+    apt: name={{ item }} state=installed 
+    with_items:
+      - mariadb-server
+      - python-mysqldb
+      - rabbitmq-server
+      - keystone 
+      - python-openstackclient 
+      - apache2 
+      - libapache2-mod-wsgi 
+      - memcached 
+      - python-memcache
+      - glance 
+      - python-glanceclient
+      - nova-api
+      - nova-cert 
+      - nova-conductor 
+      - nova-consoleauth 
+      - nova-novncproxy 
+      - nova-scheduler 
+      - python-novaclient
+      - neutron-server 
+      - neutron-plugin-ml2
+      - python-neutronclient
+      - openstack-dashboard
+      - language-pack-id
+      - ntp
+
+  - name: create Rabbitmq User
+    rabbitmq_user: user=openstack
+                 password={{ controller.rabbit_pass }}
+                 vhost=/
+                 configure_priv=.*
+                 read_priv=.*
+                 write_priv=.*
+                 state=present
+#    command: rabbitmqctl add_user openstack RABBIT_PASS
+
+# locale setting 
+  - name: Adding the path in the Profile files
+    lineinfile: dest=/etc/profile line='export LC_ALL="en_US.UTF-8" ; export LC_CTYPE="en_US.UTF-8"' insertafter='EOF' regexp='export LC_ALL="en_US.UTF-8" ; export LC_CTYPE="en_US.UTF-8"' state=present
+    tags: locale_settings
+ 
+#  - name: Permit Rabbitmq configuration
+#    command: rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+  
+  - name: create required databases 
+    mysql_db: name={{ item }} state=present 
+    with_items:
+      - keystone
+      - nova
+      - glance
+      - neutron
+      - controller
+  - name: create DB account for keystone
+    mysql_user: name=keystone password={{controller.KEYSTONE_DBPASS}} priv=keystone.*:ALL  host={{ item }} state=present
+    with_items:
+       - "%"
+       - alice
+       - localhost 
+    notify: Build keystone db  
+
+  - name: create DB account for glance
+    mysql_user: name=glance password={{controller.GLANCE_DBPASS}} priv=glance.*:ALL  host={{ item }} state=present 
+    with_items:
+       - "%"
+       - alice
+       - localhost 
+
+
+  - name: create DB account for Nova
+    mysql_user: name=nova password={{controller.NOVA_DBPASS}} priv=nova.*:ALL  host={{ item }} state=present 
+    with_items:
+       - "%"
+       - alice
+       - localhost 
+
+
+  - name: create DB account for neutron
+    mysql_user: name=neutron password={{controller.NEUTRON_DBPASS}} priv=neutron.*:ALL  host={{ item }} state=present 
+    with_items:
+       - "%"
+       - alice
+       - localhost
+
+  - name: mysql configuration 
+    copy: src=my.cnf dest=/etc/mysql/my.cnf backup=yes owner=root group=root mode=0644
+  
+  - name: restart mysql 
+    shell: service mysql restart
+
+#####  Keystone web UI 
+  - name: configured Keystone apache
+    copy: src=wsgi-keystone.conf dest=/etc/apache2/sites-available/  backup=yes
+
+#  - name: ln keystone apache
+#    file: src=/etc/apache2/sites-available/wsgi-keystone.conf dest=/etc/apache2/sites-enabled/wsgi-keystone.conf state=link
+  
+  - name: create didrectory 
+    file: path=/var/www/cgi-bin/keystone state=directory mode=0755
+
+  - name: Download keystone code to web dir 
+   # command: curl http://git.openstack.org/cgit/openstack/keystone/plain/httpd/keystone.py?h=stable/kilo | tee /var/www/cgi-bin/keystone/main /var/www/cgi-bin/keystone/admin
+    #get_url: url=http://git.openstack.org/cgit/openstack/keystone/plain/httpd/keystone.py?h=stable/kilo dest=/var/www/cgi-bin/keystone/{{ item }}
+    get_url: url=http://git.openstack.org/cgit/openstack/keystone/plain/httpd/keystone.py? dest=/var/www/cgi-bin/keystone/{{ item }}
+    with_items:
+        - admin
+        - main
+
+  - name: Setting up file perm 
+    file: path=/var/www/cgi-bin/keystone owner=keystone group=keystone mode=0755 recurse=yes
+    notify: restart apache
+
+#### NTP SERVER
+  - name: ntp configuration
+    copy: src=ntp.conf  dest=/etc/ntp.conf backup=yes
+
+  - name: restart ntp
+    service: name=ntp state=restarted
+
+## Starting keystone service 
+
+  - name: Keystone configuration 
+    copy: src=keystone.conf  dest=/etc/keystone/keystone.conf backup=yes
+    notify:
+        - Build keystone db
+
+  - name: keystone build schema 
+    shell: /bin/sh -c "keystone-manage db_sync" keystone
+###  Starting Glance Build
+  - name: Keystone service restart 
+    shell: service keystone restart 
+
+  - name: Copy glance configuration 
+    copy: src=glance-api.conf dest=/etc/glance/glance-api.conf backup=yes
+    notify:
+ #       - Build glance db
+        - restart glance-reg
+        - restart glance-api
+
+  - name: Copy glance configuration 
+    copy: src=glance-registry.conf dest=/etc/glance/glance-registry.conf backup=yes
+  
+  - name: Build glance db
+    command: /bin/sh -c "glance-manage db_sync" glance
+##### Starting Nova Build 
+  - name: Copy Nova-api conf
+    copy: src=nova.conf dest=/etc/nova/nova.conf backup=yes
+    notify:
+ #      - Build nova db
+  - name: Build nova db
+    command: /bin/sh -c "nova-manage db sync" nova
+#### Starting Neutron Build 
+
+  - name: Copy Neutron-server conf
+    copy: src=neutron.conf dest=/etc/neutron/neutron.conf backup=yes
+    notify:
+   #    - Build neutron db
+       - restart neutron-server      
+  
+
+
+  - name: Copy Neutron-server conf1
+    copy: src=ml2_conf.ini dest=/etc/neutron/plugins/ml2/ml2_conf.ini backup=yes
+    notify:
+     #  - Build neutron db
+       - restart neutron-server 
+  - name: Build neutron db
+    command: /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron 
+#### Key stone backend URl       
+  - name: Copy keystone conf
+    copy: src=keystone.conf  dest=/etc/keystone/keystone.conf backup=yes
+
+  - include: keystone.yml 
+  - include: glance.yml  tags=myglance
+  - include: nova.yml 
+  - include: neutron.yml 
+
+
+  - name: Copy openstack source  configuration
+    copy: src=openstack.rc dest=/root/openstack.rc backup=yes
