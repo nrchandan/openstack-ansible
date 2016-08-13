@@ -40,6 +40,7 @@
     - { src: 'l3_agent.ini' , dest: '/etc/neutron/l3_agent.ini' }
     - { src: 'dhcp_agent.ini' , dest: '/etc/neutron/dhcp_agent.ini' }
     - { src: 'metadata_agent.ini' , dest: '/etc/neutron/metadata_agent.ini' }
+    - { src: 'dnsmasq-neutron.conf' , dest: '/etc/neutron/dnsmasq-neutron.conf' }
     notify: restart openvswitch-switch
 
   - name: create  br-ex
