@@ -1,17 +1,17 @@
 # openstack-ansible
 openstack kilo installation on Ubuntu 14.04 
 
-This ansible code is for openstack kilo installation ( Ubuntu)  , official manual steps are documented in http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_overview.html
+This ansible code is for openstack kilo installation ( Ubuntu)  , equivalent official manual steps are available in http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_overview.html
 
 Extra modules :  This code uses extra module to manage openstack commands . https://github.com/openstack-ansible/openstack-ansible-modules
 
 Lab scenarios :
 
-Server type - VM ( vitual box)
+Server type - VM ( vitual box):
 Number of Nodes: 3 (vm) + 1 base machine  with ansible CM
-    * controller - 3GB ram , 1 network card ( 10.0.0.11) for management , 20GB HD 
-    * Neutron - 2 GB , 3 Network card ( eth0- 10.0.0.12 , eth1 -10.0.1.12 , eth2 - ext-tun)
-    * Compute - 3 GB , 2core processor , 20 GB HD , 2 network card (eth0 10.0.0.13 , eth1- 10.0.1.13)
+* controller - 3GB ram , 1 network card ( 10.0.0.11) for management , 20GB HD 
+* Neutron - 2 GB , 3 Network card ( eth0- 10.0.0.12 , eth1 -10.0.1.12 , eth2 - ext-tun)
+* Compute - 3 GB , 2core processor , 20 GB HD , 2 network card (eth0 10.0.0.13 , eth1- 10.0.1.13)
     
 Private Network : 192.168.1.0/24
 Externel network : 192.168.50.0/24 
@@ -22,18 +22,18 @@ Vbox Nic configuration :
 Deatiled Network configuration & system requirement  is available in :  http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_basic_environment.html
 
 How to excute ansible code :
-     * download extra modules in base machine /usr/share/my_modules/ & update the ansible.cfg  "library=/usr/share/my_modules/"
-     * create host entry for all 4 hosts as below .
-             10.0.0.11      	controller
-             10.0.0.12       neutron
-             10.0.0.13       compute
-             10.0.0.111     ansible
+* download extra modules in base machine /usr/share/my_modules/ & update the ansible.cfg  "library=/usr/share/my_modules/"
+* create host entry for all 4 hosts as below .
+       *  10.0.0.11      	controller
+       *  10.0.0.12       neutron
+       * 10.0.0.13       compute
+       * 10.0.0.111     ansible
       * clone this "openstack-ansible" to your base machine 
       * update the ansible host file as below .
-              controller
-              neutron
-              compute 
-      *add ssh-key access to all three host from ansible MC        
+              * controller
+              * neutron
+              *compute 
+      * add ssh-key access to all three host from ansible MC        
       * cd openstack ; ansible-playbook  site.yml  -
       
 :) Hope all good  till this step .
