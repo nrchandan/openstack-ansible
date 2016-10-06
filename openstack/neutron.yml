@@ -1,5 +1,7 @@
 ---
 
 - hosts: neutron
+  vars_files:
+     - openstack_var.yml
   roles:
     - neutron

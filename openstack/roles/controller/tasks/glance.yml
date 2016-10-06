@@ -43,6 +43,7 @@
 
      - name: Wait for glance to restart
        wait_for:
+         host={{ansible_default_ipv4.address}}
          port=9292
          delay=20
          timeout=300
@@ -52,7 +53,7 @@
        glance_image: login_username=admin
                 login_password={{controller.admin_pass}}
                 login_tenant_name=admin
-                auth_url=http://controller:35357/v2.0
+                auth_url={{controller.keystone_admin}}
                 name=cirros
                 container_format=bare
                 disk_format=qcow2

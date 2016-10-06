@@ -33,14 +33,14 @@
   - include: sysctl.yml
 
   - name: copy configuration files
-    copy: src={{ item.src }} dest={{ item.dest }} backup=yes
+    template: src={{ item.src }} dest={{ item.dest }} backup=yes
     with_items:
-    - { src: 'neutron.conf' , dest: '/etc/neutron/neutron.conf' }
-    - { src: 'ml2_conf.ini' , dest: '/etc/neutron/plugins/ml2/ml2_conf.ini' }
-    - { src: 'l3_agent.ini' , dest: '/etc/neutron/l3_agent.ini' }
-    - { src: 'dhcp_agent.ini' , dest: '/etc/neutron/dhcp_agent.ini' }
-    - { src: 'metadata_agent.ini' , dest: '/etc/neutron/metadata_agent.ini' }
-    - { src: 'dnsmasq-neutron.conf' , dest: '/etc/neutron/dnsmasq-neutron.conf' }
+    - { src: 'neutron.conf.j2' , dest: '/etc/neutron/neutron.conf' }
+    - { src: 'ml2_conf.ini.j2' , dest: '/etc/neutron/plugins/ml2/ml2_conf.ini' }
+    - { src: 'l3_agent.ini.j2' , dest: '/etc/neutron/l3_agent.ini' }
+    - { src: 'dhcp_agent.ini.j2' , dest: '/etc/neutron/dhcp_agent.ini' }
+    - { src: 'metadata_agent.ini.j2' , dest: '/etc/neutron/metadata_agent.ini' }
+    - { src: 'dnsmasq-neutron.conf.j2' , dest: '/etc/neutron/dnsmasq-neutron.conf' }
     notify: restart openvswitch-switch
 
   - name: create  br-ex

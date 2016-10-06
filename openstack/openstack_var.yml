@@ -1,5 +1,6 @@
 ---
  controller: {
+      rabbit_host: controller ,
       os_token: cc6ceb2f0bb02999a5f9 ,
       os_url: "http://controller:35357/v2.0" ,
       rabbit_pass: RABBIT_PASS ,
@@ -16,13 +17,31 @@
       demo_pass: admin ,
       nova_pass: nova ,
       neutron_pass: neutron ,
+      nova_url: "http://controller:8774/v2" ,
+      novncproxy_base_url: "http://controller:6080/vnc_auto.html" ,
 }
  glance: {   
       public_url: "http://controller:9292" , 
       internal_url: "http://controller:9292" , 
       admin_url: "http://controller:9292"  , 
-      glance_pass: glance  ,
+      glance_pass: glance ,
 }
+ keystone: {
+     admin_token: cc6ceb2f0bb02999a5f9 ,
+     auth_uri: "http://controller:5000" ,
+     auth_url: "http://controller:35357" ,
+     glance_pass: glance  ,
+     neutron_pass: neutron  ,
+     nova_pass: nova ,
 
+}
+ neutron: {
+    auth_uri: "http://controller:9696" ,
+    admin_auth_url: "http://controller:35357/v2.0" ,
+    admin_password: neutron ,
+ }
 
-      
+ nova: {
+   auth_url: "http://controller:35357" ,
+   nava_url: "http://controller:8774/v2" ,
+}
