@@ -26,6 +26,8 @@
 #### NTP SERVER
   - name: ntp configuration
     copy: src=ntp.conf  dest=/etc/ntp.conf backup=yes
+  - name: service script 
+    copy: src=service.sh  dest=/root backup=yes
 
   - name: restart ntp
     service: name=ntp state=restarted

@@ -59,6 +59,7 @@
                 disk_format=qcow2
                 state=present
                 owner=admin
-                copy_from=http://10.0.0.111/cirros-0.3.3-x86_64-disk.img
+                copy_from=http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
        tags:
          - glance_image
+       ignore_errors: yes 

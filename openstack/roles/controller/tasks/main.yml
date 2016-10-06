@@ -111,9 +111,6 @@
        - localhost
 
 
-  - name: Setting up file perm 
-    file: path=/var/www/cgi-bin/keystone owner=keystone group=keystone mode=0755 recurse=yes
-    notify: restart apache
 
 #### NTP SERVER
   - name: ntp configuration
@@ -182,7 +179,7 @@
 
 
   - name: Copy openstack source  configuration
-    copy: src={{item}} dest=/root/openstack.rc backup=yes
+    copy: src={{item}} dest=/root/ backup=yes
     with_items:
       - openstack.rc
       - service.sh
